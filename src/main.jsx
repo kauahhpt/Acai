@@ -1,29 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as THREE from "three";
-import { ArrowRight, Check, Menu, MessageCircle, Minus, Phone, Plus, X } from "lucide-react";
+import { ArrowRight, Menu, Phone, X } from "lucide-react";
+import Pedido, { SIZES, eur } from "./Pedido";
 import "./styles.css";
 
 const phone = "923352241";
-// Links da loja nas plataformas de entrega. Cola aqui o link da tua loja;
-// enquanto estiverem vazios, o botão correspondente não aparece.
-const GLOVO_URL = "https://glovoapp.com/pt/pt/lisboa/stores/pe-de-acai-lis";
-const UBER_EATS_URL = "https://www.ubereats.com/pt/store/pe-de-acai/N3OKHhwBQ3mRqJP7KZxe5w?diningMode=DELIVERY";
-
-const toppings = [
-    { name: "Morango", emoji: "🍓", group: "Fruta" },
-    { name: "Banana", emoji: "🍌", group: "Fruta" },
-    { name: "Kiwi", emoji: "🥝", group: "Fruta" },
-    { name: "Mirtilo", emoji: "🫐", group: "Fruta" },
-    { name: "Coco", emoji: "🥥", group: "Toppings" },
-    { name: "Chocolate", emoji: "🍫", group: "Toppings" },
-    { name: "Granola", emoji: "🌾", group: "Toppings" },
-    { name: "Crocantes", emoji: "🥜", group: "Toppings" },
-    { name: "Calda de chocolate", emoji: "🍫", group: "Molhos" },
-    { name: "Calda de morango", emoji: "🍓", group: "Molhos" },
-    { name: "Leite condensado", emoji: "🥛", group: "Molhos" },
-    { name: "Mel", emoji: "🍯", group: "Molhos" }
-];
 
 /* ---------- Ambientação: floresta ao amanhecer, com camadas em paralaxe ---------- */
 
@@ -283,16 +265,13 @@ function AcaiCup({ progressRef, image = "/images/acai-cup.png" }) {
     return <div className="cup-canvas" ref={mountRef} aria-hidden="true" />;
 }
 
-/* ---------- Página ---------- */
+/* ---------- Página inicial ---------- */
 
 const sceneFor = (p) => (p < 0.2 ? "intro" : p < 0.42 ? "fruta" : p < 0.64 ? "toppings" : p < 0.86 ? "molhos" : "exit");
 
 function App() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [selected, setSelected] = useState([]);
     const progress = useRef(0);
-    const [order, setOrder] = useState({ name: "", mode: "entrega", address: "", notes: "", qty: 1 });
-    const [feedback, setFeedback] = useState("");
 
     useEffect(() => {
         const root = document.documentElement;
@@ -311,47 +290,17 @@ function App() {
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
-    const toggleTopping = (name) => {
-        setSelected((current) => current.includes(name)
-            ? current.filter((item) => item !== name)
-            : [...current, name]);
-    };
+    // Ao voltar da página de pedidos, vai para a secção do link (ou para o topo)
+    useEffect(() => {
+        const id = window.location.hash.slice(1);
+        requestAnimationFrame(() => {
+            const el = id && !id.startsWith("/") ? document.getElementById(id) : null;
+            if (el) el.scrollIntoView();
+            else window.scrollTo(0, 0);
+        });
+    }, []);
 
     const closeMenu = () => setMenuOpen(false);
-    const groups = [...new Set(toppings.map((topping) => topping.group))];
-
-    const setField = (key, value) => setOrder((current) => ({ ...current, [key]: value }));
-    const canOrder = order.name.trim() && (order.mode === "levantar" || order.address.trim());
-
-    const buildOrderText = (withContact) => {
-        const lines = withContact ? ["Olá! Quero fazer um pedido pelo site:", ""] : [];
-        lines.push(`Taças: ${order.qty}`);
-        groups.forEach((group) => {
-            const items = toppings.filter((t) => t.group === group && selected.includes(t.name)).map((t) => t.name);
-            if (items.length) lines.push(`${group}: ${items.join(", ")}`);
-        });
-        if (!selected.length) lines.push("Sem toppings (só açaí)");
-        if (withContact) {
-            lines.push("", `Nome: ${order.name.trim()}`);
-            lines.push(order.mode === "entrega" ? `Entrega em: ${order.address.trim()}` : "Levanto na loja");
-        }
-        if (order.notes.trim()) lines.push(`Notas: ${order.notes.trim()}`);
-        return lines.join("\n");
-    };
-
-    const sendWhatsApp = () => {
-        if (!canOrder) return;
-        window.open(`https://wa.me/351${phone}?text=${encodeURIComponent(buildOrderText(true))}`, "_blank", "noopener");
-        setFeedback("Abrimos o WhatsApp com o teu pedido. É só enviares a mensagem.");
-    };
-
-    // As plataformas não aceitam pedidos pré-preenchidos: copiamos o pedido para colares nas notas
-    const openPlatform = (url, name) => {
-        navigator.clipboard?.writeText(buildOrderText(false))
-            .then(() => setFeedback(`Pedido copiado. Escolhe os mesmos ingredientes no ${name} e cola-o nas notas.`))
-            .catch(() => setFeedback(`Abre o ${name} e escolhe os mesmos ingredientes.`));
-        window.open(url, "_blank", "noopener");
-    };
 
     return (
         <div className="app">
@@ -367,8 +316,9 @@ function App() {
                     <a href="#inicio" onClick={closeMenu}>Início</a>
                     <a href="#monta" onClick={closeMenu}>Como funciona</a>
                     <a href="#contacto" onClick={closeMenu}>Contacto</a>
+                    <a href="#/pedido" className="nav-order" onClick={closeMenu}>Fazer pedido</a>
                 </nav>
-                <a className="nav-cta" href={`tel:${phone}`}><Phone size={17} /> Ligar</a>
+                <a className="nav-cta" href="#/pedido">Fazer pedido</a>
                 <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}>
                     {menuOpen ? <X /> : <Menu />}
                 </button>
@@ -381,99 +331,49 @@ function App() {
                             <h1><span className="line"><span>O teu açaí.</span></span></h1>
                         </div>
                         <div className="hero-bottom">
-                            <p className="hero-copy">Escolhe, monta e pesa. Junta fruta, toppings e molhos para criar uma taça só tua.</p>
+                            <p className="hero-copy">Escolhe o tamanho, a calda, o creme e os acompanhamentos. A taça é toda tua.</p>
                             <div className="hero-actions">
-                                <a className="primary-button" href="#monta">Experimentar combinações <ArrowRight size={18} /></a>
+                                <a className="primary-button" href="#/pedido">Fazer o meu pedido <ArrowRight size={18} /></a>
                             </div>
                         </div>
 
                         <div className="panel panel-fruta left">
                             <h2>Começa pela fruta.</h2>
-                            <p>Morango, banana, kiwi e mirtilo. Fresca e cortada na hora.</p>
+                            <p>Banana, manga, kiwi, uva, morango e mais. Escolhe os teus acompanhamentos.</p>
                         </div>
                         <div className="panel panel-toppings right">
                             <h2>Depois, o crocante.</h2>
-                            <p>Coco, chocolate, granola e crocantes para dar textura a cada colherada.</p>
+                            <p>Granola, amendoim, coco laminado, aveia e bolacha Oreo triturada para dar textura.</p>
                         </div>
                         <div className="panel panel-molhos left">
-                            <h2>Fecha com um molho.</h2>
-                            <p>Calda de chocolate ou de morango, leite condensado ou mel.</p>
+                            <h2>Fecha com calda e creme.</h2>
+                            <p>Leite condensado, mel, caramelo ou chocolate, e cremes de Ovomaltine, banoffe, avelã, maracujá e mais.</p>
                         </div>
                     </div>
                 </section>
 
                 <section className="builder" id="monta">
                     <div className="builder-copy">
-                        <h2>Escolhe.<br />Monta.<br />Pesa.</h2>
-                        <p>Começa pela base de açaí, escolhe o que vai por cima e paga pelo peso da tua taça.</p>
+                        <h2>Escolhe.<br />Monta.<br />Pede.</h2>
+                        <p>Começa pelo tamanho, monta a taça com os teus acompanhamentos e envia o pedido. Entregamos ou levantas na loja.</p>
                         <div className="steps-inline">
-                            <span><b>1</b> Escolhe a base</span>
-                            <span><b>2</b> Junta os toppings</span>
-                            <span><b>3</b> Pesa e aproveita</span>
+                            <span><b>1</b> Escolhe o tamanho</span>
+                            <span><b>2</b> Monta a tua taça</span>
+                            <span><b>3</b> Envia o pedido</span>
                         </div>
-                        <p className="builder-note">Escolhe os ingredientes, preenche os teus dados e envia o pedido. Confirmamos contigo no WhatsApp.</p>
+                        <a className="primary-button" href="#/pedido">Fazer o meu pedido <ArrowRight size={18} /></a>
                     </div>
 
-                    <div className="topping-picker">
-                        <div className="picker-heading">
-                            <h3>O que vai na tua taça?</h3>
-                            <span className="selection-count">{selected.length} escolhido{selected.length === 1 ? "" : "s"}</span>
-                        </div>
-                        {groups.map((group) => (
-                            <div className="topping-group" key={group}>
-                                <h4>{group}</h4>
-                                <div className="topping-options">
-                                    {toppings.filter((topping) => topping.group === group).map((topping) => {
-                                        const isSelected = selected.includes(topping.name);
-                                        return (
-                                            <button className={`topping-option ${isSelected ? "selected" : ""}`} type="button" key={topping.name} aria-pressed={isSelected} onClick={() => toggleTopping(topping.name)}>
-                                                <span className="topping-emoji">{topping.emoji}</span>
-                                                <span>{topping.name}</span>
-                                                <span className="topping-check">{isSelected && <Check size={14} />}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                        <div className="selection-summary" aria-live="polite">
-                            <span>{selected.length ? selected.join(", ") : "Escolhe alguns toppings para começar"}</span>
-                            {selected.length > 0 && <button type="button" onClick={() => setSelected([])}>Limpar</button>}
-                        </div>
-
-                        <div className="order">
-                            <h4 className="order-title">Faz o teu pedido</h4>
-                            <div className="qty-row">
-                                <span>Taças</span>
-                                <div className="qty">
-                                    <button type="button" aria-label="Menos uma taça" onClick={() => setField("qty", Math.max(1, order.qty - 1))}><Minus size={16} /></button>
-                                    <b aria-live="polite">{order.qty}</b>
-                                    <button type="button" aria-label="Mais uma taça" onClick={() => setField("qty", Math.min(10, order.qty + 1))}><Plus size={16} /></button>
-                                </div>
-                            </div>
-                            <div className="mode" role="group" aria-label="Como queres receber">
-                                <button type="button" className={order.mode === "entrega" ? "on" : ""} aria-pressed={order.mode === "entrega"} onClick={() => setField("mode", "entrega")}>Entrega</button>
-                                <button type="button" className={order.mode === "levantar" ? "on" : ""} aria-pressed={order.mode === "levantar"} onClick={() => setField("mode", "levantar")}>Levantar na loja</button>
-                            </div>
-                            <label className="field">Nome
-                                <input value={order.name} onChange={(e) => setField("name", e.target.value)} autoComplete="name" />
-                            </label>
-                            {order.mode === "entrega" && (
-                                <label className="field">Morada de entrega
-                                    <input value={order.address} onChange={(e) => setField("address", e.target.value)} autoComplete="street-address" />
-                                </label>
-                            )}
-                            <label className="field">Notas (opcional)
-                                <input value={order.notes} onChange={(e) => setField("notes", e.target.value)} />
-                            </label>
-                            <div className="order-actions">
-                                <button type="button" className="primary-button" disabled={!canOrder} onClick={sendWhatsApp}><MessageCircle size={18} /> Pedir por WhatsApp</button>
-                                {GLOVO_URL && <button type="button" className="ghost-button" onClick={() => openPlatform(GLOVO_URL, "Glovo")}>Abrir no Glovo</button>}
-                                {UBER_EATS_URL && <button type="button" className="ghost-button" onClick={() => openPlatform(UBER_EATS_URL, "Uber Eats")}>Abrir no Uber Eats</button>}
-                            </div>
-                            {feedback && <p className="order-feedback" role="status">{feedback}</p>}
-                            <p className="order-hint">O preço final depende do peso da taça.</p>
-                        </div>
+                    <div className="menu-card">
+                        <h3>Tamanhos e preços</h3>
+                        <ul className="menu-list">
+                            {SIZES.map((s) => (
+                                <li key={s.id}>
+                                    <div><b>{s.name} · {s.detail}</b><small>{s.note}</small></div>
+                                    <span className="menu-price">{eur(s.price)}</span>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </section>
 
@@ -499,4 +399,21 @@ function App() {
     );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+/* ---------- Rotas: início e página de pedidos (#/pedido) ---------- */
+
+const getRoute = () => (window.location.hash.startsWith("#/pedido") ? "pedido" : "home");
+
+function Root() {
+    const [route, setRoute] = useState(getRoute);
+    useEffect(() => {
+        const onHash = () => setRoute(getRoute());
+        window.addEventListener("hashchange", onHash);
+        return () => window.removeEventListener("hashchange", onHash);
+    }, []);
+    useEffect(() => {
+        if (route === "pedido") window.scrollTo(0, 0);
+    }, [route]);
+    return route === "pedido" ? <Pedido /> : <App />;
+}
+
+createRoot(document.getElementById("root")).render(<Root />);
