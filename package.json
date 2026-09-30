@@ -1,24 +1,44 @@
-
 {
 
   "name": "pe-de-acai",
+
   "private": true,
+
   "version": "0.0.0",
+
   "type": "module",
+
   "engines": {
-  "node": ">=20"
-} ,
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+
+    "node": ">=20"
+
   },
+
+  "scripts": {
+
+    "dev": "vite",
+
+    "build": "vite build",
+
+    "preview": "vite preview"
+
+  },
+
   "dependencies": {
-    "@vitejs/plugin-react": "latest",
+
+    "@vitejs/plugin-react": "5.2.0",
+
     "lucide-react": "latest",
+
     "react": "latest",
+
     "react-dom": "latest",
+
     "three": "^0.186.1",
-    "vite": "latest"
+
+    "vite": "7.3.6"
+
   }
+
 }
+
