@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as THREE from "three";
-import { ArrowDown, ArrowRight, Check, Menu, Phone, X } from "lucide-react";
+import { ArrowRight, Check, Menu, MessageCircle, Minus, Phone, Plus, X } from "lucide-react";
 import "./styles.css";
 
 const phone = "923352241";
+// Links da loja nas plataformas de entrega. Cola aqui o link da tua loja;
+// enquanto estiverem vazios, o botão correspondente não aparece.
+const GLOVO_URL = "https://glovoapp.com/pt/pt/lisboa/stores/pe-de-acai-lis";
+const UBER_EATS_URL = "https://www.ubereats.com/pt/store/pe-de-acai/N3OKHhwBQ3mRqJP7KZxe5w?diningMode=DELIVERY";
 
 const toppings = [
     { name: "Morango", emoji: "🍓", group: "Fruta" },
@@ -23,29 +27,52 @@ const toppings = [
 
 /* ---------- Ambientação: floresta ao amanhecer, com camadas em paralaxe ---------- */
 
-const treeline = (seed, base, amp) => {
-    let d = `M0 ${base + 400} L0 ${base}`;
-    for (let x = 0; x <= 1440; x += 12) {
-        const y = base - amp * (0.55 + 0.45 * Math.sin(x * 0.021 + seed) * Math.sin(x * 0.047 + seed * 2.3)) - amp * 0.25 * Math.abs(Math.sin(x * 0.13 + seed));
-        d += ` L${x} ${y.toFixed(1)}`;
-    }
-    return `${d} L1440 ${base + 400} Z`;
+const rng = (seed) => () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
-const FAR = treeline(1.3, 250, 70);
-const MID = treeline(4.1, 290, 80);
+// Copa da floresta: muitos círculos sobrepostos, como folhagem
+const canopy = (seed, base, rMin, rMax, lift) => {
+    const r = rng(seed);
+    const out = [];
+    for (let x = -30; x < 1470; ) {
+        const rad = rMin + r() * (rMax - rMin);
+        out.push({ cx: x, cy: base - lift * (0.5 + 0.5 * Math.sin(x * 0.005 + seed)) - r() * 14, r: rad });
+        x += rad * (0.55 + r() * 0.3);
+    }
+    return out;
+};
+const FAR = canopy(7, 290, 26, 44, 40);
+const MID = canopy(21, 320, 34, 56, 45);
+const f = (n) => n.toFixed(1);
 
+// Palmeira (versão original: folhas em arco)
 function Palm({ x, y, h, lean }) {
     const tx = x + lean, ty = y - h, L = h * 0.55;
     const fronds = [-165, -140, -115, -90, -65, -40, -15].map((a) => {
         const r = (a * Math.PI) / 180;
         const ex = tx + Math.cos(r) * L, ey = ty + Math.sin(r) * L * 0.35 + L * 0.45;
         const cx = tx + Math.cos(r) * L * 0.55, cy = ty + Math.sin(r) * L * 0.9;
-        return `M${tx} ${ty} Q${cx} ${cy} ${ex} ${ey}`;
+        return `M${f(tx)} ${f(ty)} Q${f(cx)} ${f(cy)} ${f(ex)} ${f(ey)}`;
     });
     return (
         <g>
             <path d={`M${x} ${y} Q${x + lean * 0.1} ${y - h * 0.55} ${tx} ${ty}`} strokeWidth="7" />
             {fronds.map((d, i) => <path key={i} d={d} strokeWidth="4" />)}
+        </g>
+    );
+}
+
+// Árvore alta com copa redonda
+function Tree({ x, y, h, r }) {
+    return (
+        <g>
+            <path d={`M${x} ${y}L${x} ${y - h}`} strokeWidth="6" />
+            <circle cx={x} cy={y - h} r={r} />
+            <circle cx={x - r * 0.6} cy={y - h + r * 0.4} r={r * 0.7} />
+            <circle cx={x + r * 0.6} cy={y - h + r * 0.4} r={r * 0.7} />
         </g>
     );
 }
@@ -72,15 +99,26 @@ function Ambience() {
         <div className="ambience" aria-hidden="true">
             <div className="sun" />
             <div className="cloud c1" /><div className="cloud c2" /><div className="cloud c3" /><div className="cloud c4" />
-            <svg className="layer far" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice"><path d={FAR} /></svg>
-            <svg className="layer mid" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
-                <path className="canopy" d={MID} />
+            <svg className="layer far" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
                 <g className="palms">
-                    <Palm x={170} y={340} h={215} lean={40} />
-                    <Palm x={470} y={335} h={165} lean={-30} />
-                    <Palm x={990} y={335} h={205} lean={-45} />
-                    <Palm x={1270} y={340} h={170} lean={35} />
+                    <Palm x={330} y={300} h={125} lean={15} />
+                    <Palm x={1130} y={300} h={135} lean={-18} />
                 </g>
+                {FAR.map((c, i) => <circle key={i} cx={f(c.cx)} cy={f(c.cy)} r={f(c.r)} />)}
+                <rect x="0" y="290" width="1440" height="200" />
+            </svg>
+            <svg className="layer mid" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
+                <g className="palms">
+                    <Palm x={170} y={345} h={215} lean={40} />
+                    <Palm x={490} y={340} h={165} lean={-30} />
+                    <Palm x={990} y={340} h={205} lean={-45} />
+                    <Palm x={1270} y={345} h={175} lean={35} />
+                    <Tree x={330} y={345} h={140} r={42} />
+                    <Tree x={760} y={345} h={185} r={48} />
+                    <Tree x={1140} y={345} h={135} r={40} />
+                </g>
+                {MID.map((c, i) => <circle key={i} cx={f(c.cx)} cy={f(c.cy)} r={f(c.r)} />)}
+                <rect x="0" y="320" width="1440" height="200" />
             </svg>
             <div className="mist" />
             <svg className="layer fore" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMax slice">
@@ -210,8 +248,9 @@ function AcaiCup({ progressRef, image = "/images/acai-cup.png" }) {
             const wobble = reduced ? 0 : Math.sin(t * 0.6) * 0.05;
 
             const x = wide ? keyed(smooth, K_X) * amp : 0;
-            const s = keyed(smooth, K_S) * (wide ? 1 : 0.78) * (0.75 + 0.25 * easeOutCubic(k));
-            const baseY = (wide ? 0 : -0.7) + keyed(smooth, K_Y);
+            const s = keyed(smooth, K_S) * (wide ? 1 : 0.72) * (0.75 + 0.25 * easeOutCubic(k));
+            // telemóvel: no início o copo fica entre o título e o texto; depois desce um pouco
+            const baseY = (wide ? 0 : -0.17 - clamp01(smooth / 0.08) * 0.5) + keyed(smooth, K_Y);
 
             cup.position.set(x + pointer.sx * 0.12, baseY + rise * -4 + float, 0);
             cup.scale.setScalar(s);
@@ -252,6 +291,8 @@ function App() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [selected, setSelected] = useState([]);
     const progress = useRef(0);
+    const [order, setOrder] = useState({ name: "", mode: "entrega", address: "", notes: "", qty: 1 });
+    const [feedback, setFeedback] = useState("");
 
     useEffect(() => {
         const root = document.documentElement;
@@ -278,6 +319,39 @@ function App() {
 
     const closeMenu = () => setMenuOpen(false);
     const groups = [...new Set(toppings.map((topping) => topping.group))];
+
+    const setField = (key, value) => setOrder((current) => ({ ...current, [key]: value }));
+    const canOrder = order.name.trim() && (order.mode === "levantar" || order.address.trim());
+
+    const buildOrderText = (withContact) => {
+        const lines = withContact ? ["Olá! Quero fazer um pedido pelo site:", ""] : [];
+        lines.push(`Taças: ${order.qty}`);
+        groups.forEach((group) => {
+            const items = toppings.filter((t) => t.group === group && selected.includes(t.name)).map((t) => t.name);
+            if (items.length) lines.push(`${group}: ${items.join(", ")}`);
+        });
+        if (!selected.length) lines.push("Sem toppings (só açaí)");
+        if (withContact) {
+            lines.push("", `Nome: ${order.name.trim()}`);
+            lines.push(order.mode === "entrega" ? `Entrega em: ${order.address.trim()}` : "Levanto na loja");
+        }
+        if (order.notes.trim()) lines.push(`Notas: ${order.notes.trim()}`);
+        return lines.join("\n");
+    };
+
+    const sendWhatsApp = () => {
+        if (!canOrder) return;
+        window.open(`https://wa.me/351${phone}?text=${encodeURIComponent(buildOrderText(true))}`, "_blank", "noopener");
+        setFeedback("Abrimos o WhatsApp com o teu pedido. É só enviares a mensagem.");
+    };
+
+    // As plataformas não aceitam pedidos pré-preenchidos: copiamos o pedido para colares nas notas
+    const openPlatform = (url, name) => {
+        navigator.clipboard?.writeText(buildOrderText(false))
+            .then(() => setFeedback(`Pedido copiado. Escolhe os mesmos ingredientes no ${name} e cola-o nas notas.`))
+            .catch(() => setFeedback(`Abre o ${name} e escolhe os mesmos ingredientes.`));
+        window.open(url, "_blank", "noopener");
+    };
 
     return (
         <div className="app">
@@ -310,7 +384,6 @@ function App() {
                             <p className="hero-copy">Escolhe, monta e pesa. Junta fruta, toppings e molhos para criar uma taça só tua.</p>
                             <div className="hero-actions">
                                 <a className="primary-button" href="#monta">Experimentar combinações <ArrowRight size={18} /></a>
-                                <a className="scroll-cue" href="#monta"><ArrowDown size={15} /> Desce para ver</a>
                             </div>
                         </div>
 
@@ -338,7 +411,7 @@ function App() {
                             <span><b>2</b> Junta os toppings</span>
                             <span><b>3</b> Pesa e aproveita</span>
                         </div>
-                        <p className="builder-note">Esta é uma pequena experiência para combinares sabores. As opções reais podem variar.</p>
+                        <p className="builder-note">Escolhe os ingredientes, preenche os teus dados e envia o pedido. Confirmamos contigo no WhatsApp.</p>
                     </div>
 
                     <div className="topping-picker">
@@ -366,6 +439,40 @@ function App() {
                         <div className="selection-summary" aria-live="polite">
                             <span>{selected.length ? selected.join(", ") : "Escolhe alguns toppings para começar"}</span>
                             {selected.length > 0 && <button type="button" onClick={() => setSelected([])}>Limpar</button>}
+                        </div>
+
+                        <div className="order">
+                            <h4 className="order-title">Faz o teu pedido</h4>
+                            <div className="qty-row">
+                                <span>Taças</span>
+                                <div className="qty">
+                                    <button type="button" aria-label="Menos uma taça" onClick={() => setField("qty", Math.max(1, order.qty - 1))}><Minus size={16} /></button>
+                                    <b aria-live="polite">{order.qty}</b>
+                                    <button type="button" aria-label="Mais uma taça" onClick={() => setField("qty", Math.min(10, order.qty + 1))}><Plus size={16} /></button>
+                                </div>
+                            </div>
+                            <div className="mode" role="group" aria-label="Como queres receber">
+                                <button type="button" className={order.mode === "entrega" ? "on" : ""} aria-pressed={order.mode === "entrega"} onClick={() => setField("mode", "entrega")}>Entrega</button>
+                                <button type="button" className={order.mode === "levantar" ? "on" : ""} aria-pressed={order.mode === "levantar"} onClick={() => setField("mode", "levantar")}>Levantar na loja</button>
+                            </div>
+                            <label className="field">Nome
+                                <input value={order.name} onChange={(e) => setField("name", e.target.value)} autoComplete="name" />
+                            </label>
+                            {order.mode === "entrega" && (
+                                <label className="field">Morada de entrega
+                                    <input value={order.address} onChange={(e) => setField("address", e.target.value)} autoComplete="street-address" />
+                                </label>
+                            )}
+                            <label className="field">Notas (opcional)
+                                <input value={order.notes} onChange={(e) => setField("notes", e.target.value)} />
+                            </label>
+                            <div className="order-actions">
+                                <button type="button" className="primary-button" disabled={!canOrder} onClick={sendWhatsApp}><MessageCircle size={18} /> Pedir por WhatsApp</button>
+                                {GLOVO_URL && <button type="button" className="ghost-button" onClick={() => openPlatform(GLOVO_URL, "Glovo")}>Abrir no Glovo</button>}
+                                {UBER_EATS_URL && <button type="button" className="ghost-button" onClick={() => openPlatform(UBER_EATS_URL, "Uber Eats")}>Abrir no Uber Eats</button>}
+                            </div>
+                            {feedback && <p className="order-feedback" role="status">{feedback}</p>}
+                            <p className="order-hint">O preço final depende do peso da taça.</p>
                         </div>
                     </div>
                 </section>

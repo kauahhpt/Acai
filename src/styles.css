@@ -41,10 +41,11 @@ html[data-scene="molhos"] .cloud { opacity: .3; }
 
 .layer { position: absolute; left: -5%; width: 110%; bottom: 0; }
 .far { height: 52vh; transform: translateY(calc(var(--sp) * 40px)); }
-.far path { fill: var(--tree-far); }
+.far circle, .far rect { fill: var(--tree-far); }
+.far path { fill: none; stroke: var(--tree-far); stroke-linecap: round; }
 .mid { height: 48vh; transform: translateY(calc(var(--sp) * 90px)); }
-.mid .canopy { fill: var(--tree-mid); }
-.mid .palms path { fill: none; stroke: var(--tree-mid); stroke-linecap: round; }
+.mid circle, .mid rect { fill: var(--tree-mid); }
+.mid path { fill: none; stroke: var(--tree-mid); stroke-linecap: round; }
 .mist { position: absolute; left: 0; right: 0; bottom: 0; height: 40vh; background: linear-gradient(0deg, var(--glow), transparent); opacity: .5; }
 .fore { left: 0; width: 100%; height: 44vh; transform: translateY(calc(var(--sp) * 150px)); }
 
@@ -74,12 +75,11 @@ html[data-scene="molhos"] .cloud { opacity: .3; }
 @keyframes line-in { to { transform: translateY(0); } }
 @keyframes fade-in { to { opacity: 1; } }
 
-.hero-bottom { position: absolute; z-index: 3; left: clamp(22px, 9vw, 140px); right: clamp(22px, 9vw, 140px); bottom: 7vh; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; transition: opacity .6s, transform .8s cubic-bezier(.2,.8,.2,1); }
-.hero-copy { max-width: 340px; color: var(--fg); font-size: 16px; line-height: 1.65; opacity: 0; animation: fade-in .8s ease 1.5s forwards; }
-.hero-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; opacity: 0; animation: fade-in .8s ease 1.7s forwards; }
-.scroll-cue { display: flex; align-items: center; gap: 7px; color: var(--fg); font-size: 13px; font-weight: 700; }
+.hero-bottom { position: absolute; z-index: 3; left: 50%; bottom: 6vh; width: min(460px, calc(100% - 44px)); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; transition: opacity .6s, transform .8s cubic-bezier(.2,.8,.2,1); }
+.hero-copy { color: var(--fg); font-size: 16px; line-height: 1.65; opacity: 0; animation: fade-in .8s ease 1.5s forwards; }
+.hero-actions { opacity: 0; animation: fade-in .8s ease 1.7s forwards; }
 html:not([data-scene="intro"]) .hero-top { opacity: 0; transform: translateY(-40px); }
-html:not([data-scene="intro"]) .hero-bottom { opacity: 0; transform: translateY(30px); pointer-events: none; }
+html:not([data-scene="intro"]) .hero-bottom { opacity: 0; transform: translate(-50%, 30px); pointer-events: none; }
 
 .panel { position: absolute; z-index: 3; top: 50%; max-width: 390px; color: var(--fg); opacity: 0; transform: translateY(-38%); pointer-events: none; transition: opacity .7s, transform 1s cubic-bezier(.2,.8,.2,1); }
 .panel.left { left: clamp(22px, 9vw, 140px); }
@@ -141,8 +141,8 @@ footer { position: relative; z-index: 4; padding: 24px clamp(22px, 7vw, 100px); 
     .nav-links { position: absolute; top: 60px; left: 14px; right: 14px; padding: 20px; display: none; flex-direction: column; align-items: stretch; gap: 17px; border-radius: 18px; background: #fffefa; box-shadow: 0 16px 35px #2c10391a; }
     .nav-links.open { display: flex; }
     .hero-top { top: 14vh; }
-    .hero-bottom { flex-direction: column; align-items: flex-start; bottom: 5vh; gap: 16px; }
-    .hero-actions { align-items: flex-start; }
+    .hero-bottom { bottom: 4vh; gap: 14px; }
+    .hero-copy { font-size: 15px; line-height: 1.55; }
     .panel { top: 15vh; left: 20px !important; right: 20px !important; max-width: none; transform: translateY(20px); }
     .panel h2 { font-size: 44px; }
     html[data-scene="fruta"] .panel-fruta, html[data-scene="toppings"] .panel-toppings, html[data-scene="molhos"] .panel-molhos { transform: none; }
@@ -158,3 +158,25 @@ footer { position: relative; z-index: 4; padding: 24px clamp(22px, 7vw, 100px); 
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     .hero-copy, .hero-actions { opacity: 1; }
 }
+
+/* ---------- Pedido ---------- */
+.order { margin-top: 26px; padding-top: 24px; border-top: 1px solid #eee8ef; display: grid; gap: 16px; }
+.order-title { color: var(--purple-dark); font: 800 20px "Bricolage Grotesque", sans-serif; letter-spacing: -.02em; }
+.qty-row { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; color: #463f48; }
+.qty { display: flex; align-items: center; gap: 14px; }
+.qty button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #e0d6e3; border-radius: 50%; background: #fff; color: var(--purple); cursor: pointer; }
+.qty button:hover { border-color: var(--purple); }
+.qty b { min-width: 20px; text-align: center; font-size: 16px; }
+.mode { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 999px; background: #f4eef5; }
+.mode button { padding: 10px 12px; border: 0; border-radius: 999px; background: transparent; color: #5b4d62; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s, color .2s; }
+.mode button.on { background: var(--purple); color: #fff; }
+.field { display: grid; gap: 6px; color: #463f48; font-size: 13px; font-weight: 600; }
+.field input { width: 100%; padding: 12px 14px; border: 1px solid #e0d6e3; border-radius: 12px; background: #fff; color: var(--ink); font: 500 15px "DM Sans", sans-serif; }
+.field input:focus { outline: 3px solid #b5db5588; border-color: var(--purple); }
+.order-actions { display: grid; gap: 10px; }
+.order-actions .primary-button { width: 100%; padding: 15px 20px; cursor: pointer; }
+.primary-button:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+.ghost-button { padding: 13px 20px; border: 1px solid #d8cbdc; border-radius: 999px; background: #fff; color: var(--purple-dark); font-size: 14px; font-weight: 700; cursor: pointer; transition: border-color .2s, transform .2s; }
+.ghost-button:hover { border-color: var(--purple); transform: translateY(-2px); }
+.order-feedback { padding: 12px 14px; border-radius: 12px; background: #eef7d8; color: #2f4a10; font-size: 13px; line-height: 1.5; }
+.order-hint { color: #7a727c; font-size: 12px; }
