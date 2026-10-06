@@ -1,0 +1,1057 @@
+/* =========================================
+   PÉ DE AÇAÍ — CARROSSEL
+========================================= */
+
+.acai-carousel {
+    --carousel-bg: #3b0b59;
+    --carousel-fg: #fff9e6;
+    --carousel-accent: #00e676;
+
+    position: relative;
+
+    width: 100%;
+    height: 100svh;
+    min-height: 650px;
+
+    overflow: hidden;
+
+    background: var(--carousel-bg);
+    color: var(--carousel-fg);
+
+    isolation: isolate;
+
+    transition:
+        background-color 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        color 650ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    cursor: grab;
+
+    user-select: none;
+    touch-action: pan-y;
+}
+
+.acai-carousel:active {
+    cursor: grabbing;
+}
+
+
+/* =========================================
+   LUZ CENTRAL
+========================================= */
+
+.acai-carousel__light {
+    position: absolute;
+    inset: 0;
+
+    z-index: 0;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at 50% 52%,
+            rgba(255, 255, 255, 0.32) 0%,
+            rgba(255, 255, 255, 0.12) 25%,
+            transparent 58%
+        );
+}
+
+
+/* =========================================
+   GRAIN
+========================================= */
+
+.acai-carousel__grain {
+    position: absolute;
+    inset: 0;
+
+    z-index: 80;
+
+    pointer-events: none;
+
+    opacity: 0.08;
+
+    mix-blend-mode: soft-light;
+
+    background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.85'/%3E%3C/svg%3E");
+
+    background-size: 180px 180px;
+}
+
+
+/* =========================================
+   TEXTO GIGANTE
+========================================= */
+
+.acai-carousel__ghost {
+    position: absolute;
+
+    z-index: 2;
+
+    top: 16%;
+    left: 50%;
+
+    width: 100%;
+
+    transform: translateX(-50%);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    overflow: visible;
+
+    pointer-events: none;
+}
+
+.acai-carousel__ghost span {
+    display: block;
+
+    font-family: "Anton", sans-serif;
+
+    font-size: clamp(
+        100px,
+        19vw,
+        310px
+    );
+
+    line-height: 0.82;
+
+    font-weight: 400;
+
+    letter-spacing: -0.045em;
+
+    white-space: nowrap;
+
+    color: var(--carousel-fg);
+
+    opacity: 0.92;
+
+    animation:
+        acaiGhostIn
+        650ms
+        cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes acaiGhostIn {
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(30px)
+            scale(0.95);
+    }
+
+    to {
+        opacity: 0.92;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+
+/* =========================================
+   EXPLOSÕES
+
+   TEMPORARIAMENTE DESLIGADAS.
+   Depois vamos reativar.
+========================================= */
+
+.acai-carousel__explosions {
+    position: absolute;
+    inset: 0;
+
+    z-index: 5;
+
+    pointer-events: none;
+
+}
+
+.acai-carousel__explosion {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: min(1050px, 88vw);
+    height: min(850px, 82vh);
+
+    object-fit: contain;
+
+    opacity: 0;
+
+    transform:
+        translate(-50%, -48%)
+        scale(0.72)
+        rotate(-3deg);
+
+    filter: blur(5px);
+
+    transition:
+        opacity 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        filter 650ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    will-change:
+        transform,
+        opacity,
+        filter;
+}
+
+.acai-carousel__explosion.is-active {
+    opacity: 0.9;
+
+    transform:
+        translate(-50%, -48%)
+        scale(1)
+        rotate(0);
+
+    filter: blur(0);
+}
+
+
+/* =========================================
+   ÁREA DOS COPOS
+========================================= */
+
+.acai-carousel__cups {
+    position: absolute;
+    inset: 0;
+
+    z-index: 15;
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   COPO BASE
+
+   Todos os copos possuem exatamente
+   o mesmo tamanho físico.
+
+   O tamanho visual muda por scale(),
+   deixando a animação muito mais suave.
+========================================= */
+
+.acai-carousel__cup {
+    position: absolute;
+
+    left: 50%;
+    bottom: -2%;
+
+    width: min(34vw, 560px);
+    height: 82vh;
+
+    padding: 0;
+    margin: 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    pointer-events: auto;
+    cursor: pointer;
+
+    transform-origin: bottom center;
+
+    transition:
+        left 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        bottom 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        filter 650ms cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 650ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    will-change:
+        left,
+        bottom,
+        transform,
+        filter,
+        opacity;
+}
+
+.acai-carousel__cup img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    object-position: bottom center;
+
+    pointer-events: none;
+
+    filter:
+        drop-shadow(
+            0 30px 28px
+            rgba(0, 0, 0, 0.18)
+        );
+}
+
+
+/* =========================================
+   COPO CENTRAL
+========================================= */
+
+.acai-carousel__cup--center {
+    left: 50%;
+    bottom: -3%;
+
+    z-index: 30;
+
+    opacity: 1;
+
+    transform:
+        translateX(-50%)
+        scale(1)
+        rotate(0deg);
+
+    filter: blur(0);
+}
+
+
+/* =========================================
+   COPO À ESQUERDA
+
+   O central encolhe e vai para esta posição.
+========================================= */
+
+.acai-carousel__cup--left {
+    left: 37%;
+    bottom: 5%;
+
+    z-index: 20;
+
+    opacity: 0.86;
+
+    transform:
+        translateX(-50%)
+        scale(0.34)
+        rotate(-3deg);
+
+    filter: blur(1px);
+}
+
+
+/* =========================================
+   COPO À DIREITA
+
+   Este cresce e vem para o centro.
+========================================= */
+
+.acai-carousel__cup--right {
+    left: 63%;
+    bottom: 5%;
+
+    z-index: 20;
+
+    opacity: 0.86;
+
+    transform:
+        translateX(-50%)
+        scale(0.34)
+        rotate(3deg);
+
+    filter: blur(1px);
+}
+
+
+/* =========================================
+   SEGUNDA FILEIRA — ESQUERDA
+========================================= */
+
+.acai-carousel__cup--far-left {
+    left: 29%;
+    bottom: 7%;
+
+    z-index: 10;
+
+    opacity: 0.58;
+
+    transform:
+        translateX(-50%)
+        scale(0.20)
+        rotate(-5deg);
+
+    filter: blur(2px);
+}
+
+
+/* =========================================
+   SEGUNDA FILEIRA — DIREITA
+========================================= */
+
+.acai-carousel__cup--far-right {
+    left: 71%;
+    bottom: 7%;
+
+    z-index: 10;
+
+    opacity: 0.58;
+
+    transform:
+        translateX(-50%)
+        scale(0.20)
+        rotate(5deg);
+
+    filter: blur(2px);
+}
+
+
+/* =========================================
+   COPOS FORA DE CENA
+========================================= */
+
+.acai-carousel__cup--hidden {
+    left: 50%;
+    bottom: 9%;
+
+    z-index: 1;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translateX(-50%)
+        scale(0.12);
+
+    filter: blur(5px);
+}
+
+
+/* =========================================
+   INFORMAÇÕES DO SABOR
+========================================= */
+
+.acai-carousel__info {
+    position: absolute;
+
+    z-index: 55;
+
+    left: clamp(24px, 5vw, 80px);
+    bottom: clamp(30px, 7vh, 85px);
+
+    width: min(360px, 30vw);
+
+    pointer-events: auto;
+}
+
+.acai-carousel__eyebrow {
+    margin:
+        0
+        0
+        10px;
+
+    font-family: "Inter", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.18em;
+
+    color: var(--carousel-fg);
+
+    opacity: 0.78;
+
+    animation:
+        acaiInfoIn
+        500ms ease both;
+}
+
+.acai-carousel__info h2 {
+    margin: 0;
+
+    font-family: "Anton", sans-serif;
+
+    font-size: clamp(
+        38px,
+        5vw,
+        72px
+    );
+
+    line-height: 0.95;
+
+    font-weight: 400;
+
+    letter-spacing: -0.035em;
+
+    color: var(--carousel-fg);
+
+    animation:
+        acaiInfoIn
+        550ms ease both;
+}
+
+.acai-carousel__description {
+    margin:
+        15px
+        0
+        24px;
+
+    max-width: 340px;
+
+    font-family: "Inter", sans-serif;
+
+    font-size: 14px;
+
+    line-height: 1.65;
+
+    color: var(--carousel-fg);
+
+    opacity: 0.78;
+
+    animation:
+        acaiInfoIn
+        600ms ease both;
+}
+
+@keyframes acaiInfoIn {
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(14px);
+    }
+
+    to {
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* =========================================
+   BOTÕES DE NAVEGAÇÃO
+========================================= */
+
+.acai-carousel__controls {
+    display: flex;
+
+    gap: 10px;
+}
+
+.acai-carousel__controls button {
+    display: grid;
+
+    place-items: center;
+
+    width: 58px;
+    height: 58px;
+
+    padding: 0;
+
+    border:
+        1.5px solid
+        var(--carousel-fg);
+
+    border-radius: 999px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.05
+        );
+
+    color: var(--carousel-fg);
+
+    cursor: pointer;
+
+    backdrop-filter: blur(6px);
+
+    transition:
+        transform 160ms ease,
+        background-color 160ms ease;
+}
+
+.acai-carousel__controls button:hover {
+    transform: scale(1.08);
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.16
+        );
+}
+
+.acai-carousel__controls svg {
+    width: 23px;
+    height: 23px;
+
+    stroke-width: 2;
+}
+
+
+/* =========================================
+   CONTADOR
+========================================= */
+
+.acai-carousel__counter {
+    position: absolute;
+
+    z-index: 55;
+
+    top: 32px;
+    right: 38px;
+
+    display: flex;
+
+    gap: 7px;
+
+    align-items: center;
+
+    color: var(--carousel-fg);
+
+    font-family:
+        "Inter",
+        sans-serif;
+
+    font-size: 12px;
+
+    letter-spacing: 0.08em;
+
+    opacity: 0.78;
+}
+
+.acai-carousel__counter strong {
+    font-size: 16px;
+
+    opacity: 1;
+}
+
+
+/* =========================================
+   INDICADORES
+========================================= */
+
+.acai-carousel__dots {
+    position: absolute;
+
+    z-index: 60;
+
+    left: 50%;
+    bottom: 25px;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    gap: 8px;
+}
+
+.acai-carousel__dots button {
+    width: 6px;
+    height: 6px;
+
+    padding: 0;
+
+    border: 0;
+
+    border-radius: 99px;
+
+    background: var(--carousel-fg);
+
+    opacity: 0.36;
+
+    cursor: pointer;
+
+    transition:
+        opacity 200ms ease,
+        width 200ms ease;
+}
+
+.acai-carousel__dots button.is-active {
+    width: 26px;
+
+    opacity: 1;
+}
+
+
+/* =========================================
+   CTA
+========================================= */
+
+.acai-carousel__cta {
+    position: absolute;
+
+    z-index: 60;
+
+    right: clamp(
+        24px,
+        4vw,
+        65px
+    );
+
+    bottom: clamp(
+        35px,
+        7vh,
+        82px
+    );
+
+    display: flex;
+
+    gap: 12px;
+
+    align-items: center;
+
+    text-decoration: none;
+
+    color: var(--carousel-fg);
+
+    font-family:
+        "Anton",
+        sans-serif;
+
+    font-size: clamp(
+        28px,
+        3.8vw,
+        58px
+    );
+
+    line-height: 1;
+
+    letter-spacing: -0.025em;
+
+    transition:
+        transform 200ms ease,
+        opacity 200ms ease;
+}
+
+.acai-carousel__cta svg {
+    width: clamp(
+        25px,
+        2.8vw,
+        42px
+    );
+
+    height: clamp(
+        25px,
+        2.8vw,
+        42px
+    );
+}
+
+.acai-carousel__cta:hover {
+    transform: translateX(8px);
+}
+
+.acai-carousel__cta.is-custom {
+    color: var(--carousel-accent);
+}
+
+
+/* =========================================
+   DICA "ARRASTE"
+========================================= */
+
+.acai-carousel__drag-hint {
+    position: absolute;
+
+    z-index: 55;
+
+    top: 34px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    font-family:
+        "Inter",
+        sans-serif;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.22em;
+
+    color: var(--carousel-fg);
+
+    opacity: 0.5;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1000px) {
+
+    /*
+       Mantemos o mesmo tamanho-base para
+       todos os copos também no tablet.
+    */
+
+    .acai-carousel__cup {
+        width: min(45vw, 500px);
+        height: 74vh;
+    }
+
+
+    .acai-carousel__cup--center {
+        left: 50%;
+        bottom: 0;
+
+        transform:
+            translateX(-50%)
+            scale(1);
+    }
+
+
+    .acai-carousel__cup--left {
+        left: 30%;
+        bottom: 8%;
+
+        transform:
+            translateX(-50%)
+            scale(0.30)
+            rotate(-3deg);
+    }
+
+
+    .acai-carousel__cup--right {
+        left: 70%;
+        bottom: 8%;
+
+        transform:
+            translateX(-50%)
+            scale(0.30)
+            rotate(3deg);
+    }
+
+
+    .acai-carousel__cup--far-left {
+        left: 19%;
+
+        transform:
+            translateX(-50%)
+            scale(0.17)
+            rotate(-5deg);
+    }
+
+
+    .acai-carousel__cup--far-right {
+        left: 81%;
+
+        transform:
+            translateX(-50%)
+            scale(0.17)
+            rotate(5deg);
+    }
+
+
+    .acai-carousel__info {
+        width: 300px;
+    }
+
+
+    .acai-carousel__description {
+        max-width: 260px;
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 639px) {
+
+    .acai-carousel {
+        min-height: 600px;
+    }
+
+
+    .acai-carousel__ghost {
+        top: 15%;
+    }
+
+
+    .acai-carousel__ghost span {
+        font-size: clamp(
+            78px,
+            27vw,
+            145px
+        );
+    }
+
+
+    /*
+       Mesmo princípio:
+       todos os copos mantêm tamanho-base,
+       mudando apenas pelo transform: scale().
+    */
+
+    .acai-carousel__cup {
+        width: min(80vw, 390px);
+        height: 61vh;
+    }
+
+
+    .acai-carousel__cup--center {
+        left: 50%;
+        bottom: 17%;
+
+        opacity: 1;
+
+        transform:
+            translateX(-50%)
+            scale(1);
+
+        filter: blur(0);
+    }
+
+
+    .acai-carousel__cup--left {
+        left: 12%;
+        bottom: 25%;
+
+        opacity: 0.55;
+
+        transform:
+            translateX(-50%)
+            scale(0.32)
+            rotate(-3deg);
+
+        filter: blur(1px);
+    }
+
+
+    .acai-carousel__cup--right {
+        left: 88%;
+        bottom: 25%;
+
+        opacity: 0.55;
+
+        transform:
+            translateX(-50%)
+            scale(0.32)
+            rotate(3deg);
+
+        filter: blur(1px);
+    }
+
+
+    .acai-carousel__cup--far-left {
+        left: -3%;
+        bottom: 27%;
+
+        opacity: 0;
+
+        pointer-events: none;
+
+        transform:
+            translateX(-50%)
+            scale(0.16);
+    }
+
+
+    .acai-carousel__cup--far-right {
+        left: 103%;
+        bottom: 27%;
+
+        opacity: 0;
+
+        pointer-events: none;
+
+        transform:
+            translateX(-50%)
+            scale(0.16);
+    }
+
+
+    .acai-carousel__cup--hidden {
+        opacity: 0;
+
+        transform:
+            translateX(-50%)
+            scale(0.1);
+    }
+
+
+    .acai-carousel__info {
+        left: 18px;
+        bottom: 22px;
+
+        width: 54vw;
+    }
+
+
+    .acai-carousel__eyebrow {
+        display: none;
+    }
+
+
+    .acai-carousel__info h2 {
+        font-size: 33px;
+    }
+
+
+    .acai-carousel__description {
+        display: none;
+    }
+
+
+    .acai-carousel__controls {
+        margin-top: 14px;
+    }
+
+
+    .acai-carousel__controls button {
+        width: 45px;
+        height: 45px;
+    }
+
+
+    .acai-carousel__controls svg {
+        width: 19px;
+        height: 19px;
+    }
+
+
+    .acai-carousel__cta {
+        right: 17px;
+        bottom: 29px;
+
+        gap: 6px;
+
+        font-size: clamp(
+            19px,
+            6.1vw,
+            28px
+        );
+    }
+
+
+    .acai-carousel__cta svg {
+        width: 21px;
+        height: 21px;
+    }
+
+
+    .acai-carousel__counter {
+        top: 20px;
+        right: 18px;
+    }
+
+
+    .acai-carousel__dots {
+        display: none;
+    }
+}
+
+
+/* =========================================
+   ACESSIBILIDADE —
+   REDUÇÃO DE MOVIMENTO
+========================================= */
+
+
