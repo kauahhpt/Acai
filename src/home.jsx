@@ -32,7 +32,7 @@ import {
     useLenis
 } from "./hooks/useLenis";
 
-
+{}
 export default function Home() {
 
     useLenis();
