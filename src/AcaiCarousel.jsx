@@ -1,5 +1,6 @@
 import React, {
     useEffect,
+    useLayoutEffect,
     useRef,
     useState
 } from "react";
@@ -152,6 +153,8 @@ export default function AcaiCarousel() {
 
     const pointerStart = useRef(null);
 
+    const ghostRef = useRef(null);
+
 
     const active = FLAVORS[activeIndex];
 
@@ -178,6 +181,69 @@ export default function AcaiCarousel() {
         };
 
     }, []);
+
+
+    /* ------------------------------
+       NOME GIGANTE: ENCOLHE ATÉ CABER
+    ------------------------------ */
+
+    useLayoutEffect(() => {
+
+        const span = ghostRef.current;
+
+        if (!span) return;
+
+
+        let cancelled = false;
+
+
+        const fit = () => {
+
+            if (cancelled || !span.parentElement) {
+                return;
+            }
+
+
+            // volta ao tamanho definido no CSS
+            span.style.fontSize = "";
+
+
+            const max =
+                span.parentElement.clientWidth * 0.92;
+
+            const width = span.offsetWidth;
+
+
+            if (width > max) {
+
+                const size = parseFloat(
+                    getComputedStyle(span).fontSize
+                );
+
+                span.style.fontSize =
+                    `${(size * max) / width}px`;
+            }
+
+        };
+
+
+        fit();
+
+        // volta a medir quando a fonte (Anton) terminar de carregar
+        document.fonts?.ready.then(fit);
+
+        window.addEventListener("resize", fit);
+
+
+        return () => {
+
+            cancelled = true;
+
+            window.removeEventListener("resize", fit);
+
+        };
+
+    }, [activeIndex]);
 
 
     /* ------------------------------
@@ -450,7 +516,14 @@ export default function AcaiCarousel() {
                 className="acai-carousel__ghost"
                 aria-hidden="true"
             >
-                <span key={active.id}>
+                <span
+                    key={active.id}
+                    ref={ghostRef}
+                    style={{
+                        "--len":
+                            active.name.length
+                    }}
+                >
                     {active.name}
                 </span>
             </div>
