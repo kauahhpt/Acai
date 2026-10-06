@@ -8,14 +8,17 @@ const getRoute = () => (window.location.hash.startsWith("#/pedido") ? "pedido" :
 
 function Root() {
     const [route, setRoute] = useState(getRoute);
+
     useEffect(() => {
         const onHash = () => setRoute(getRoute());
         window.addEventListener("hashchange", onHash);
         return () => window.removeEventListener("hashchange", onHash);
     }, []);
+
     useEffect(() => {
         if (route === "pedido") window.scrollTo(0, 0);
     }, [route]);
+
     return route === "pedido" ? <Pedido /> : <Home />;
 }
 
