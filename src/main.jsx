@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import Home from "./Home";
 import Pedido from "./Pedido";
 import "./styles/site.css";
+import "./styles/sections.css";
 
 const getRoute = () => (window.location.hash.startsWith("#/pedido") ? "pedido" : "home");
 
