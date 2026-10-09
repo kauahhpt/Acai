@@ -251,3 +251,63 @@
 @media (prefers-reduced-motion: reduce) {
     .pd *, .pd *::before, .pd *::after { transition-duration: .01ms !important; }
 }
+/* ---------- Disponibilidade (acrescentar ao FIM do pedido.css) ---------- */
+
+.pd-size:disabled { opacity: .55; cursor: not-allowed; }
+.pd-size:disabled:hover { transform: none; border-color: var(--peach-line); }
+.pd-size-top > .pd-soldout {
+    font: 800 12px var(--body); text-transform: uppercase; letter-spacing: .04em; color: var(--danger);
+}
+.pd-warn {
+    margin-top: 6px; padding: 8px 12px; border-radius: 12px;
+    background: #fde8e4; color: var(--danger); font-size: 13px; font-weight: 700; line-height: 1.4;
+}
+/* ---------- Itens com contador (acrescentar ao FIM do pedido.css) ---------- */
+
+.pd-count { padding: 0; cursor: default; gap: 0; }
+.pd-count:hover { transform: none; }
+
+.pd-count-main {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+    padding: 8px 16px; border: 0; border-radius: 999px; background: transparent;
+    color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.pd-count-main:hover:not(:disabled) { color: var(--blue); }
+.pd-count-main:disabled { opacity: .45; cursor: not-allowed; }
+
+.pd-count-label { display: inline-flex; align-items: center; gap: 8px; padding: 8px 6px 8px 16px; }
+.pd-count-ctrl { display: inline-flex; align-items: center; gap: 6px; padding: 0 6px 0 2px; }
+.pd-count-ctrl b { min-width: 18px; text-align: center; font-weight: 800; }
+.pd-count-ctrl button {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    border: 2px solid #fff; border-radius: 50%; background: transparent; color: #fff; cursor: pointer;
+    transition: background .2s, color .2s;
+}
+.pd-count-ctrl button:hover:not(:disabled) { background: #fff; color: var(--blue); }
+.pd-count-ctrl button:disabled { opacity: .4; cursor: not-allowed; }
+
+.pd-count button:focus-visible { outline: 3px solid var(--brown); outline-offset: 2px; }
+/* ---------- Aviso de fechado, horário e alergénios (acrescentar ao FIM do pedido.css) ---------- */
+
+.pd-info {
+    max-width: 1240px; margin: 0 auto;
+    padding: 16px clamp(16px, 4vw, 48px) 0; display: grid; gap: 12px;
+}
+.pd-closed {
+    padding: 14px 18px; border-radius: 18px;
+    background: #fde8e4; border: 2px solid var(--danger); color: var(--danger);
+    font-size: 15px; font-weight: 700; line-height: 1.5;
+}
+.pd-schedule { color: var(--brown); font-size: 15px; font-weight: 800; }
+
+.pd-allergens {
+    padding: 12px 18px; border-radius: 18px; background: var(--cream-soft); border: 2px solid var(--peach-line);
+    color: var(--brown-deep); font-size: 14px; font-weight: 600; line-height: 1.5;
+}
+.pd-allergens summary { min-height: 40px; display: flex; align-items: center; color: var(--blue); font-weight: 800; cursor: pointer; }
+.pd-allergens summary:focus-visible { outline: 3px solid var(--brown); outline-offset: 2px; border-radius: 8px; }
+.pd-allergens h4 { margin: 14px 0 6px; color: var(--brown); font-size: 14px; font-weight: 800; }
+.pd-allergens ul { list-style: none; display: grid; gap: 2px; }
+.pd-allergens p { margin-top: 14px; color: var(--muted); font-weight: 700; }
+
+.pd-allergen-line { margin-top: 6px; color: var(--danger); font-size: 13px; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }

@@ -1,5 +1,6 @@
 import React, {
-    useEffect
+    useEffect,
+    useState
 } from "react";
 
 import Header from "./components/Header";
@@ -31,12 +32,32 @@ import Footer
 import {
     useLenis
 } from "./hooks/useLenis";
+import { supabase } from "./supabaseClient";
 
 
 export default function Home() {
 
     useLenis();
 
+        const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        const loadProducts = async () => {
+            const { data, error } = await supabase
+                .from("products")
+                .select("*");
+
+            if (error) {
+                console.error("Erro ao buscar produtos:", error);
+                return;
+            }
+
+            console.log("Produtos do Supabase:", data);
+            setProducts(data);
+        };
+
+        loadProducts();
+    }, []);
 
     useEffect(() => {
 

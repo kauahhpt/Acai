@@ -1053,5 +1053,88 @@
    ACESSIBILIDADE —
    REDUÇÃO DE MOVIMENTO
 ========================================= */
+/* =========================================
+   DESEMPENHO NO TELEMÓVEL
+========================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+    .acai-carousel__grain {
+        display: none;
+    }
+
+    .acai-carousel__controls button {
+        backdrop-filter: none;
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    .acai-carousel__cup img {
+        filter: none;
+    }
+
+    .acai-carousel__explosion,
+    .acai-carousel__explosion.is-active {
+        width: min(1050px, 120vw);
+        filter: none;
+        will-change: auto;
+
+        transition:
+            opacity 650ms cubic-bezier(0.4, 0, 0.2, 1),
+            transform 650ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .acai-carousel__explosion.is-active {
+        will-change: transform, opacity;
+    }
+}
+
+
+/* Copos só com transform: fluido na placa gráfica */
+
+@media (max-width: 639px) {
+
+    .acai-carousel__cup {
+        left: 50%;
+        bottom: 17%;
+
+        filter: none;
+
+        transition:
+            transform 650ms cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 650ms cubic-bezier(0.4, 0, 0.2, 1);
+
+        will-change: transform, opacity;
+    }
+
+    .acai-carousel__cup--center {
+        opacity: 1;
+        transform: translate3d(-50%, 0, 0) scale(1);
+    }
+
+    .acai-carousel__cup--left {
+        opacity: 0.55;
+        transform: translate3d(calc(-50% - 38vw), -8svh, 0) scale(0.32) rotate(-3deg);
+    }
+
+    .acai-carousel__cup--right {
+        opacity: 0.55;
+        transform: translate3d(calc(-50% + 38vw), -8svh, 0) scale(0.32) rotate(3deg);
+    }
+
+    .acai-carousel__cup--far-left {
+        opacity: 0;
+        transform: translate3d(calc(-50% - 53vw), -10svh, 0) scale(0.16);
+    }
+
+    .acai-carousel__cup--far-right {
+        opacity: 0;
+        transform: translate3d(calc(-50% + 53vw), -10svh, 0) scale(0.16);
+    }
+
+    .acai-carousel__cup--hidden {
+        opacity: 0;
+        transform: translate3d(-50%, 8svh, 0) scale(0.1);
+    }
+}
 
 
