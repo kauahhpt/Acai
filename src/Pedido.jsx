@@ -5,6 +5,7 @@ import {
 } from "./data/menu";
 import { supabase } from "./supabaseClient";
 import { Usesettings} from "./hooks/Usesettings";
+import { useAuth } from "./hooks/useAuth";
 import "./pedido.css";
 
 export { SIZES, eur };
@@ -12,6 +13,7 @@ export { SIZES, eur };
 /* ---------- Lógica ---------- */
 
 const EMPTY = { size: "g", calda: "", creme: "", acomp: [], cremeExtra: [], extras: [], colher: null };
+const EMPTY_CUSTOMER = { name: "", mode: "entrega", address: "", notes: "" };
 const STORAGE = "pe-de-acai-pedido";
 
 const load = () => {
@@ -129,11 +131,14 @@ function CountChip({ label, price, count, canAdd, onAdd, onRemove }) {
 export default function Pedido() {
     const saved = useMemo(load, []);
     const { settings } = Usesettings();
+    const { user, loading: authLoading } = useAuth();
+
+    // Dono do pedido guardado no navegador: id do utilizador, ou null se foi feito sem login.
+    const [owner, setOwner] = useState(saved.owner ?? null);
+
     const [item, setItem] = useState(EMPTY);
     const [cart, setCart] = useState(saved.cart || []);
-    const [customer, setCustomer] = useState(
-        saved.customer || { name: "", mode: "entrega", address: "", notes: "" }
-    );
+    const [customer, setCustomer] = useState(saved.customer || EMPTY_CUSTOMER);
     const [added, setAdded] = useState("");
     const [feedback, setFeedback] = useState("");
 
@@ -189,12 +194,32 @@ export default function Pedido() {
         try {
             localStorage.setItem(
                 STORAGE,
-                JSON.stringify({ cart, customer })
+                JSON.stringify({ cart, customer, owner })
             );
         } catch {
             /* sem armazenamento */
         }
-    }, [cart, customer]);
+    }, [cart, customer, owner]);
+
+    // Cada pedido guardado pertence a uma conta. Se a sessão terminou ou entrou
+    // outra conta (mesmo que o logout tenha sido feito noutra página), o pedido
+    // da pessoa anterior é apagado. Quem monta a taça sem login e depois entra
+    // mantém o carrinho.
+    useEffect(() => {
+        if (authLoading) return;
+
+        const currentId = user?.id ?? null;
+
+        if (owner !== null && owner !== currentId) {
+            setCart([]);
+            setItem(EMPTY);
+            setCustomer(EMPTY_CUSTOMER);
+            setAdded("");
+            setFeedback("");
+        }
+
+        if (owner !== currentId) setOwner(currentId);
+    }, [user?.id, authLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Tamanhos: os do menu.js + os criados no admin (que ainda não existem no menu.js).
     const knownKeys = new Set(SIZES.flatMap(sizeKeys));
@@ -416,6 +441,12 @@ export default function Pedido() {
         settings.orders_open &&
         customer.name.trim() &&
         (customer.mode === "levantar" || customer.address.trim());
+
+    // O que ainda falta para poder enviar o pedido (para explicar o botão desativado)
+    const sendMissing = [];
+    if (cart.length === 0) sendMissing.push("adicionar uma taça ao pedido");
+    if (!customer.name.trim()) sendMissing.push("o teu nome");
+    if (customer.mode === "entrega" && !customer.address.trim()) sendMissing.push("a morada");
 
     const orderText = (withContact) => {
         const lines = withContact
@@ -813,7 +844,8 @@ export default function Pedido() {
 
                     {cart.length === 0 ? (
                         <p className="pd-empty">
-                            Ainda não adicionaste nenhuma taça.
+                            Ainda não adicionaste nenhuma taça. Escolhe o tamanho e a colher
+                            e carrega em «Adicionar ao pedido», no fim dos passos.
                         </p>
                     ) : (
                         <ul className="pd-items">
@@ -993,6 +1025,12 @@ export default function Pedido() {
                     >
                         <MessageCircle size={18} /> Enviar pedido por WhatsApp
                     </button>
+
+                    {settings.orders_open && sendMissing.length > 0 && (
+                        <p className="pd-hint">
+                            Para enviar, falta: {sendMissing.join(", ")}.
+                        </p>
+                    )}
 
                     {!settings.orders_open && (
                         <p className="pd-warn">
