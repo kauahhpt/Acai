@@ -9,12 +9,11 @@ export default function Footer() {
                 <span className="brand-name">PÉ DE <b>AÇAÍ</b></span>
             </a>
             <nav>
-                <a href="#cardapio">Cardápio</a>
-                <a href="#como">Como funciona</a>
-                <a href="#contacto">Contacto</a>
                 <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer">
                     WhatsApp {WHATSAPP_DISPLAY}
                 </a>
+                <a href="/Privacidade.html">Política de Privacidade</a>
+                <a href="/Termos.html">Termos de Utilização</a>
             </nav>
             <small>© {new Date().getFullYear()} Pé de Açaí</small>
         </footer>
